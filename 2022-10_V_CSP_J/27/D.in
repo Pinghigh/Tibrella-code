@@ -1,0 +1,13 @@
+{
+    "workbench.preferredDarkColorTheme": "One Dark Pro",
+    "workbench.preferredLightColorTheme": "Atom One Light",
+    "workbench.productIconTheme": "fluent-icons",
+    "window.autoDetectColorScheme": true,
+    "files.autoSave": "onFocusChange",
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.mouseWheelZoom": true,
+    "C_Cpp.default.compilerPath": "D:\\mingw64\\bin\\g++.exe",
+    "C_Cpp.default.compileCommands": "D:\\mingw64\\bin\\g++.exe",
+    "code-runner.runInTerminal": true,
+    "code-runner.ignoreSelection": true,
+    "code-runner.executorM
