@@ -1,4 +1,0 @@
-T1 小 H 做算术	calculate.cpp/in/out
-T2 小 H 打比赛	contest.cpp/in/out
-T3 小 H 拼字串	string.cpp/in/out
-T4 lzh的新火车游戏	poker.cpp/in/out	注意此题没有special judge

@@ -1,3 +1,0 @@
-文件名采用
-
-A/B/C/D.cpp/in/out
