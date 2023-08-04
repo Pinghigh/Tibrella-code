@@ -1,0 +1,6 @@
+If:
+  PathExclude: ./*
+
+Diagnostics:
+  ClangTidy:
+    Remove: '*'

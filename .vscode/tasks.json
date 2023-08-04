@@ -1,0 +1,65 @@
+// tasks.json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clang++",
+            "type": "shell",
+            "group": "build",
+            "command": "clang++",
+            "args": [
+                "${file}",
+                "-o",
+                "${fileBasenameNoExtension}.exe",
+                "-Wall",
+                "-g",
+                "-std=c++14"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "redirection run",
+            "command": "${workspaceRoot}/pwsh/pwsh.exe -C 'clang++ -g ${file} -o ${workspaceRoot}/out/${fileBasenameNoExtension}.exe -std=c++14 -fsanitize=undefined -fsanitize=address -Wextra -Wall && cat ${workspaceRoot}/redirection/input | ${workspaceRoot}/out/${fileBasenameNoExtension}.exe > ${workspaceRoot}/redirection/output'",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "redirection run without pwsh",
+            "command": "clang++ -g ${file} -o ${workspaceRoot}/out/${fileBasenameNoExtension}.exe -std=c++14 -fsanitize=undefined -fsanitize=address -Wall -Wextra -fcolor-diagnostics '-Wl,--stack=268435456' -O2 && cat ${workspaceRoot}/redirection/input | ${workspaceRoot}/out/${fileBasenameNoExtension}.exe > ${workspaceRoot}/redirection/output",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "redirection run without pwsh linux",
+            "command": "g++ -g ${file} -o ${workspaceRoot}/out/${fileBasenameNoExtension}.exe -std=c++14 -Wall -Wextra -fsanitize=undefined -fsanitize=address -O2 && cat ${workspaceRoot}/redirection/input | ${workspaceRoot}/out/${fileBasenameNoExtension}.exe > ${workspaceRoot}/redirection/output",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    "problemMatcher": {
+        "owner": "c",
+        "fileLocation": ["relative", "${workspaceRoot}"],
+        "pattern": {
+            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+        }
+    }
+}

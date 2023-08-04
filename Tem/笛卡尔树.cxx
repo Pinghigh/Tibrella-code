@@ -45,22 +45,22 @@ using nodePointer = Node*;
 nodePointer rline[N], nodlist[N];
 i64 top;
 
-nodePointer tot = space, null = space, root;
+nodePointer tot = space, root;
 
-static inline __attribute__((always_inline)) nodePointer new_node() {
+nodePointer new_node() {
     ++tot;
-    tot->lc = tot->rc = null;
+    tot->lc = tot->rc = nullptr;
     tot->p = tot->id = 0;
     return tot;
 }
 
-static inline __attribute__((always_inline)) void insert(i64 id, i64 p) {
+void insert(i64 id, i64 p) {
     nodePointer idx = new_node();
-    idx->lc = idx->rc = null;
+    idx->lc = idx->rc = nullptr;
     nodlist[id] = idx;
     idx->id = id;
     idx->p = p;
-    nodePointer las = null;
+    nodePointer las = nullptr;
     while (top && rline[top]->p > p) {
         las = rline[top--];
     }
@@ -78,16 +78,20 @@ i64 ansl, ansr;
 
 void ans() {
     for (i64 i = 1; i <= n; ++i) {
-        ansl ^= i * (nodlist[i]->lc->id + 1);
-        ansr ^= i * (nodlist[i]->rc->id + 1);
-        // if (nod->lc != null) printf("%d %d\n", nod->id, nod->lc->id);
-        // if (nod->rc != null) printf("%d %d\n", nod->id, nod->rc->id);
+        if (nodlist[i]->lc)
+            ansl ^= i * (nodlist[i]->lc->id + 1);
+        else
+            ansl ^= i * 1;
+
+        if (nodlist[i]->rc)
+            ansr ^= i * (nodlist[i]->rc->id + 1);
+        else
+            ansr ^= i * 1;
     }
     printf("%lld %lld", ansl, ansr);
 }
 
 int main() {
-    null->lc = null->rc = null;
     n = read();
     for (int i = 1; i <= n; ++i) {
         insert(i, read());

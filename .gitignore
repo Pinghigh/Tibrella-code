@@ -1,6 +1,7 @@
 /test*
-/.vscode/
 /2022-10_V_CSP_J/
 /out/
 /pwsh/
 /redirection/
+
+*.exe

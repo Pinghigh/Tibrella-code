@@ -1,0 +1,14 @@
+// 将键绑定放在此文件中以覆盖默认值
+// 只是个示例，keybindings.json 扔到项目里没有用，得自己改软件的配置
+[
+  {
+    "key": "F4",
+    "command": "workbench.action.tasks.runTask",
+    "args": "redirection run"
+  },
+  {
+    "key": "F6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "redirection run without pwsh"
+  }
+]
