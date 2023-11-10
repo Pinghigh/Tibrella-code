@@ -4,3 +4,6 @@ If:
 Diagnostics:
   ClangTidy:
     Remove: '*'
+
+CompileFlags:
+  Add: [-std=gnu++14]

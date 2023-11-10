@@ -26,6 +26,7 @@ struct edge {
 std::vector<edge> tree[N], vir[N];
 
 void add(std::vector<edge>* g, i32 fr, i32 to, i64 cost) {
+    // if (g == vir) cout << fr << ' ' << to << ' ' << cost << '\n';
     g[fr].emplace_back(edge(to, cost));
     g[to].emplace_back(edge(fr, cost));
 }
@@ -81,20 +82,30 @@ std::bitset<N> is_key;
 
 std::vector<i32> key_node;
 
+i32 stk[N];
+
 void build() {
+    i32 top = 0;
+    vir[1].clear();
+    stk[++top] = 1;
     std::sort(all(key_node), [](const i32& a, const i32& b) -> bool { return dfn[a] < dfn[b]; });  // 按照 dfn 排序
-
-    for (i32 i = 1; i < t1; ++i) {
-        key_node.emplace_back(get_lca(key_node[i - 1], key_node[i]));
+    for (const auto& nod : key_node) {
+        vir[nod].clear();
+        // if (stk[top] == nod) continue;
+        i32 lca;
+        if ((lca = get_lca(stk[top], nod)) != stk[top]) {
+            while (dfn[stk[top - 1]] > dfn[lca])
+                add(vir, stk[top - 1], stk[top], min_edg[stk[top]]), --top;
+            if (stk[top - 1] != lca)  // 不在栈内
+                vir[lca].clear(), add(vir, lca, stk[top], min_edg[stk[top]]), stk[top] = lca;
+            else
+                add(vir, lca, stk[top], min_edg[stk[top]]), --top;
+        }
+        stk[++top] = nod;
     }
-    key_node.emplace_back(1);
 
-    std::sort(all(key_node), [](const i32& a, const i32& b) -> bool { return dfn[a] < dfn[b]; });  // 按照 dfn 排序
-    key_node.erase(std::unique(all(key_node)), key_node.end());                                    // 二次排序之后去重
-
-    for (i32 i = 1; i < key_node.size(); ++i) {
-        add(vir, get_lca(key_node[i - 1], key_node[i]), key_node[i], min_edg[key_node[i]]);
-    }
+    for (i32 i = 1; i < top; ++i)
+        add(vir, stk[i], stk[i + 1], min_edg[stk[i + 1]]);
 }
 
 void init(i32 nod) {  // min
@@ -109,9 +120,10 @@ void init(i32 nod) {  // min
 i64 f[N];
 
 void dfs(i32 nod, i32 fa) {
-    // cout << nod << ' ';
+    // cout << "D " << nod << ' ';
     if (is_key[nod]) {
         f[nod] = min_edg[nod];
+        is_key[nod] = false;
     } else {
         i64 cost = 0;
         for (auto& e : vir[nod]) {
@@ -152,11 +164,17 @@ int main() {
     while (m--) {
         cin >> t1;
         for (auto& nod : key_node)
-            is_key[nod] = false, vir[nod].clear();
+            is_key[nod] = false;
         key_node.clear();
+        if (t1 == 1) {
+            cin >> t2;
+            cout << min_edg[t2] << '\n';
+            continue;
+        }
         for (i32 i = 1; i <= t1; ++i) {
             cin >> t2;
             is_key[t2] = true;
+            // vir[t2].clear();
             key_node.emplace_back(t2);
         }
         build();

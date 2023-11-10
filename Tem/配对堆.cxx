@@ -1,20 +1,22 @@
-using i64 = long long;
+using i32 = int;
 
-#define __SIZ 2000006
 
-struct Node {
-    i64 val;
-    Node *child, *nex;
-} tree[__SIZ], *rubbish_bin[__SIZ]; // 提早分配内存，new 太慢了
-Node *null = tree, *tot = tree;
-i64 bintop;
+
+template<typename T>
 class pairing_heap {
+    #define __SIZ 1000006
+    struct Node {
+        T val;
+        Node *child, *nex;
+    } tree[__SIZ], *rubbish_bin[__SIZ];  // 提早分配内存，new 太慢了
+    Node *null = tree, *tot = tree;
+    unsigned bintop;
     Node* root;
 
     Node* new_node() {
         Node* nod;
         if (bintop)
-            nod = rubbish_bin[bintop--]; // 垃圾回收
+            nod = rubbish_bin[bintop--];  // 垃圾回收
         else
             nod = ++tot;
         nod->child = null;
@@ -50,45 +52,55 @@ class pairing_heap {
         return meld(merges(c), meld(x, y));         // x 与 y 配对在一起，剩下的继续配对
     }
 
+    unsigned siz;
+
 public:
     pairing_heap() {
         root = null;
+        null->child = null->nex = null;
     }
-    void push(i64 x) {
+    void push(const T& x) {
         Node* y = new_node();
         y->val = x;
         if (root == null)
             root = y;
         else
             root = meld(root, y);
+        ++siz;
     }
-    i64 top() {
+    T top() {
         return root->val;
     }
     void pop() {
         Node* t = merges(root->child);
         remove(root);
         root = t;
+        --siz;
     }
-} q;
+    unsigned size() {
+        return siz;
+    }
+    
+};
+
+pairing_heap<i32> q;
 
 #include <iostream>
 
 using std::cin;
 using std::cout;
 
-i64 n;
-i64 num;
-i64 op;
+i32 n;
+i32 num;
+i32 op;
 
 int main() {
-    null->child = null->nex = null;
     std::ios::sync_with_stdio(false);
     cin.tie(nullptr);
     cout.tie(nullptr);
 
     cin >> n;
-    for (i64 i = 1; i <= n; ++i) {
+    for (i32 i = 1; i <= n; ++i) {
         cin >> op;
         switch (op) {
             case (1):

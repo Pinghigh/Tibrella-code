@@ -54,7 +54,7 @@ void push_down(Node* nod) {
     nod->lazy = 0;
 }
 
-void modify(Node* nod, int L, int R, int v) {6
+void modify(Node* nod, int L, int R, int v) {
     if (L == nod->l && R == nod->r) {
         nod->lazy += v;
         nod->v += (nod->r - nod->l + 1) * v;

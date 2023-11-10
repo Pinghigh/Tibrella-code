@@ -101,7 +101,6 @@ void build(Node* nod, int L, int R) {
 }
 
 void modify(Node* nod, int L, int R, int v) {
-    // cout << "L :" << L << " R: " << R << " l " << nod->l << " r: " << nod->r << '\n';
     if (L == nod->l && R == nod->r) {
         (nod->lazy += v) %= p;
         (nod->val += v * (nod->r - nod->l + 1) % p) %= p;
@@ -200,9 +199,6 @@ int main() {
             cout << query(root, dfn[x], dfn[x] + siz[x] - 1) % p<< '\n';
         }
     }
-
-    // for (int i = 1; i <= n; ++i)
-    //     cout << wson[i] << ' ';
 
     return 0;
 }

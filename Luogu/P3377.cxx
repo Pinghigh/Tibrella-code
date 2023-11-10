@@ -1,113 +1,113 @@
-#pragma GCC target("avx2,sse4a,lzcnt,popcnt,bmi,bmi2,fma")
+#pragma GCC target("avx2,ssse3,sse4a,lzcnt,popcnt,bmi,bmi2,fma")
 
+#include <cstdint>
 #include <cstdio>
 
-namespace Fastio {
-    namespace Fread {
-        const int SIZE = (1 << 20);
-        char buf[SIZE], *S, *T;
-        inline char getchar() {
-            if (S == T) {
-                T = (S = buf) + fread(buf, 1, SIZE, stdin);
-                if (S == T) return '\n';
-            }
-            return *S++;
+using i8 = int8_t;
+using i16 = int16_t;
+using i32 = int32_t;
+using i64 = int64_t;
+using i128 = __int128_t;
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using u128 = __uint128_t;
+
+struct istream {
+    static constexpr u32 SIZE = 1 << 18;
+    char buf[SIZE], *cur, *end;
+    FILE* dist;
+    bool eof;
+
+    istream(FILE* __dist) {
+        dist = __dist;
+        eof = false;
+        cur = end = nullptr;
+    }
+
+    istream(const char*& __dist) {
+        dist = fopen(__dist, "r");
+        eof = false;
+        cur = end = nullptr;
+    }
+
+    char get() {
+        if (cur == end) {
+            cur = buf, end = buf + fread(buf, 1, SIZE, dist);
+            if (cur == end) return EOF;
         }
-    }  // namespace Fread
-    namespace Fwrite {
-        const int SIZE = (1 << 20);
-        char buf[SIZE], *S = buf, *T = buf + SIZE;
-        inline void flush() {
-            fwrite(buf, 1, S - buf, stdout);
-            S = buf;
+        return *(cur++);
+    }
+
+    template <typename T>
+    istream& operator>>(T& x) {
+        char c;
+        x = 0;
+        do {
+            c = get();
+        } while (c < 48 || c > 57);
+        do {
+            x = x * 10 + (c ^ 48);
+            c = get();
+        } while (c > 47 && c < 58);
+        return *this;
+    }
+} cin(stdin);
+
+struct ostream {
+    static constexpr u32 SIZE = 1 << 19;
+    char buf[SIZE];
+    char* cur = buf;
+    FILE* dist;
+
+    ostream(FILE* __dist) {
+        dist = __dist;
+    }
+
+    ostream(const char*& __dist) {
+        dist = fopen(__dist, "r");
+    }
+
+    void put(const char& c) {
+        if (cur - buf == SIZE) {
+            fwrite(buf, 1, SIZE, dist);
+            cur = buf;
         }
-        inline void putchar(char c) {
-            *S++ = c;
-            if (S == T) flush();
-        }
-        struct NTR {
-            ~NTR() {
-                flush();
-            }
-        } ztr;
-    }  // namespace Fwrite
-#ifdef ONLINE_JUDGE
-#define getchar Fread::getchar
-#define putchar Fwrite::putchar
-#endif
-    struct Reader {
-        template <typename T>
-        Reader& operator>>(T& x) {
-            char c = getchar();
-            T dp = 1;
-            while (c < '0' || c > '9') {
-                if (c == '-') dp = -1;
-                c = getchar();
-            }
-            x = 0;
-            while (c >= '0' && c <= '9')
-                x = x * 10 + (c - '0'), c = getchar();
-            x *= dp;
-            return *this;
-        }
-        Reader& operator>>(char& c) {
-            c = getchar();
-            while (c == ' ' || c == '\n')
-                c = getchar();
-            return *this;
-        }
-        Reader& operator>>(char* str) {
-            int len = 0;
-            char c = getchar();
-            while (c == ' ' || c == '\n')
-                c = getchar();
-            while (c != ' ' && c != '\n' && c != '\r')
-                str[len++] = c, c = getchar();
-            str[len] = '\0';
-            return *this;
-        }
-        inline Reader() {}
-    } cin;
-    const char endl = '\n';
-    struct Writer {
-        template <typename T>
-        Writer& operator<<(T x) {
-            if (!x) {
-                putchar('0');
-                return *this;
-            }
-            if (x < 0) putchar('-'), x = -x;
-            static char sta[40];
-            int top = 0;
-            while (x)
-                sta[++top] = x % 10 ^ 48, x /= 10;
-            while (top)
-                putchar(sta[top]), --top;
-            return *this;
-        }
-        Writer& operator<<(char c) {
-            putchar(c);
-            return *this;
-        }
-        Writer& operator<<(char* str) {
-            int cur = 0;
-            while (str[cur])
-                putchar(str[cur++]);
-            return *this;
-        }
-        Writer& operator<<(const char* str) {
-            int cur = 0;
-            while (str[cur])
-                putchar(str[cur++]);
-            return *this;
-        }
-        inline Writer() {}
-    } cout;
-#define cin Fastio::cin
-#define cout Fastio::cout
-#define endl Fastio::endl
-}  // namespace Fastio
-using namespace Fastio;
+        *(cur++) = c;
+    }
+    void flush() {
+        fwrite(buf, 1, cur - buf, dist);
+        cur = buf;
+    }
+    ostream& operator<<(const char* s) {
+        for (u64 i = 0; s[i]; ++i)
+            put(s[i]);
+        return *this;
+    }
+
+    ostream& operator<<(const char& c) {
+        put(c);
+        return *this;
+    }
+    template <typename T>
+    ostream& operator<<(T x) {
+        static char stk[20];
+        char top = 0;
+        do {
+            stk[++top] = x % 10 ^ 48;
+            x /= 10;
+        } while (x);
+        do
+            put(stk[top]);
+        while (--top);
+        return *this;
+    }
+
+    ~ostream() {
+        flush();
+    }
+} cout(stdout);
 
 #define __SIZ 100005
 
@@ -147,8 +147,7 @@ struct Node {
 Node *null = tree, *tot = tree;
 int bintop;
 class pairing_heap {
-
-    inline __attribute__((always_inline)) Node* new_node() {
+    static Node* new_node() {
         Node* nod;
         if (bintop)
             nod = rubbish_bin[bintop--];
@@ -159,11 +158,11 @@ class pairing_heap {
         return nod;
     }
 
-    inline __attribute__((always_inline)) void remove(Node* x) {
+    void remove(Node* x) {
         rubbish_bin[++bintop] = x;
     }
 
-    inline __attribute__((always_inline)) Node* meld(Node* x, Node* y) {  // 合并两个堆
+    Node* meld(Node* x, Node* y) {  // 合并两个堆
         if (x == null)
             return y;
         else if (y == null)
@@ -187,7 +186,7 @@ class pairing_heap {
         return meld(merges(c), meld(x, y));         // x 与 y 配对在一起，剩下的继续配对
     }
 
-    inline __attribute__((always_inline)) Node* del(Node* x) {
+    Node* del(Node* x) {
         Node* t = merges(x->child);
         remove(x);
         return t;
@@ -198,7 +197,7 @@ public:
     pairing_heap() {
         root = null;
     }
-    inline __attribute__((always_inline)) void push(num x) {
+    inline void push(num x) {
         Node* y = new_node();
         y->val = x;
         if (root == null)
@@ -206,14 +205,14 @@ public:
         else
             root = meld(root, y);
     }
-    inline __attribute__((always_inline)) num top() {
+    inline num top() {
         return root->val;
     }
-    inline __attribute__((always_inline)) void pop() {
+    inline void pop() {
         root = del(root);
     }
 
-    inline __attribute__((always_inline)) void join(pairing_heap& x) {
+    inline void join(pairing_heap& x) {
         root = meld(root, x.root);
     }
 } q[__SIZ];
@@ -221,25 +220,23 @@ public:
 #include <bitset>
 
 std::bitset<__SIZ> st;
-int n;
-int op;
-int m;
-int t1, t2;
 
 int main() {
     null->child = null->nex = null;
 
+    int n;
+    int m;
     cin >> n >> m;
     for (int i = 1; i <= n; ++i) {
-        fa[i] = i;
-        cin >> t1;
-        tmp.id = i;
-        tmp.data = t1;
+        fa[i] = tmp.id = i;
+        cin >> tmp.data;
         q[i].push(tmp);
     }
     while (m--) {
+        int op;
         cin >> op;
         if (op == 1) {
+            int t1, t2;
             cin >> t1 >> t2;
             if (st[t1] || st[t2]) continue;
             t1 = find(t1);
@@ -248,13 +245,14 @@ int main() {
             q[t1].join(q[t2]);
             uni(t1, t2);
         } else {
+            int t1;
             cin >> t1;
             if (st[t1]) {
-                cout << -1 << endl;
+                cout << "-1\n";
             } else {
                 t1 = find(t1);
                 st[q[t1].top().id] = 1;
-                cout << q[t1].top().data << endl;
+                cout << q[t1].top().data << '\n';
                 q[t1].pop();
             }
         }

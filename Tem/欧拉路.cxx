@@ -1,86 +1,150 @@
-// P7771
-#pragma GCC target("avx2,popcnt,lzcnt,fma,sse4.1,sse4.2,bmi,bmi2,abm,sse2,sse3,sse4,mmx")
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 
-#define getchar() getchar_unlocked()
-#define putchar(a) putchar_unlocked(a)
+using i8 = int8_t;
+using i16 = int16_t;
+using i32 = int32_t;
+using i64 = int64_t;
+using i128 = __int128_t;
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using u128 = __uint128_t;
 
-template <typename T>
-void read(T& x) {
-    x = 0;
-    char ch;
-    do {
-        ch = getchar();
-    } while (ch < 48 || ch > 57);
-    do {
-        x = (x << 3) + (x << 1) + (ch ^ 48);
-        ch = getchar();
-    } while (ch > 47 && ch < 58);
-}
+struct istream {
+    static constexpr u32 SIZE = 1 << 18;
+    char buf[SIZE], *cur, *end;
+    FILE* dist;
 
-template <typename T>
-void write(T x) {
-    if (x > 9) write(x / 10);
-    putchar(x % 10 ^ '0');
-}
+    istream(FILE* __dist) {
+        cur = end = 0;
+        dist = __dist;
+    }
 
-using namespace std;
+    istream(const char*& __dist) {
+        cur = end = 0;
+        dist = fopen(__dist, "r");
+    }
 
-#define N 100514
-// #define int long long
+    char get() {
+        if (cur == end) {
+            cur = buf, end = buf + fread(buf, 1, SIZE, dist);
+            if (cur == end) return EOF;
+        }
+        return *cur++;
+    }
 
-class edge {
-public:
-    edge* nex;
-    int u, v;
-    bool vis;
-} graph[N * 2];
+    template <typename T>
+    istream& operator>>(T& x) {
+        char c;
+        x = 0;
+        do {
+            c = get();
+        } while (c < 48 || c > 57);
+        do {
+            x = x * 10 + (c ^ 48);
+            c = get();
+        } while (c > 47 && c < 58);
+        return *this;
+    }
+} cin(stdin);
 
-edge* tot = graph;
-edge* fir[N];
+struct ostream {
+    static constexpr u32 SIZE = 1 << 18;
+    char buf[SIZE];
+    char* cur = buf;
+    FILE* dist;
+
+    ostream(FILE* __dist) {
+        dist = __dist;
+    }
+
+    ostream(const char*& __dist) {
+        dist = fopen(__dist, "r");
+    }
+
+    void put(const char& c) {
+        if (cur - buf == SIZE) {
+            fwrite(buf, 1, SIZE, dist);
+            cur = buf;
+        }
+        *(cur++) = c;
+    }
+    void flush() {
+        fwrite(buf, 1, cur - buf, dist);
+        cur = buf;
+    }
+    ostream& operator<<(const char* s) {
+        for (u64 i = 0; s[i]; ++i)
+            put(s[i]);
+        return *this;
+    }
+
+    ostream& operator<<(const char& c) {
+        put(c);
+        return *this;
+    }
+    template <typename T>
+    ostream& operator<<(T x) {
+        if (x < 0) put('-'), x = -x;
+        static char stk[30];
+        char top = 0;
+        do {
+            stk[++top] = x % 10 ^ 48;
+            x /= 10;
+        } while (x);
+        do
+            put(stk[top]);
+        while (--top);
+        return *this;
+    }
+
+    ~ostream() {
+        flush();
+    }
+} cout(stdout);
+
+#include <cassert>
+#include <vector>
+
+#define N 2000004
+#define all(x) x.begin(), x.end()
+
 int n, m;
 int st, en;  // 起点
 int t1, t2;
 int ind[N], oud[N];
-int ans[N * 2];
-int tail;
-pair<int, int> dat[N * 4];
 int cnt;
-void add(int a, int b) {
-    ++tot;
-    tot->u = a;
-    tot->v = b;
-    tot->nex = fir[a];
-    fir[a] = tot;
-    ++ind[b];
-    ++oud[a];
+std::vector<i32> g[N];
+std::vector<i32> ans;
+
+static inline void add(int a, int b) {
+    g[a].emplace_back(b);
+    ++oud[a], ++ind[b];
 }
 
-void dfs(int num) {
-    if (tail > m) return;
-    for (edge* e = fir[num]; fir[num]; fir[num] = e->nex) {
-        e = fir[num];
-        if (e->vis) continue;
-        e->vis = 1;
-        dfs(e->v);
+void dfs(const i32& u) {
+    if (ans.size() > m) return;
+    for (; g[u].size();) {
+        assert(g[u].size());
+        i32 v = g[u].back();
+        g[u].pop_back();
+        dfs(v);
     }
-    // ans.push_back(num);
-    ans[++tail] = num;
+    ans.push_back(u);
 }
 
-signed main() {
-    read(n);
-    read(m);
+int main() {
+    cin >> n >> m;
     for (int i = 1; i <= m; ++i) {
-        read(dat[i].second);
-        read(dat[i].first);
+        i32 a, b;
+        cin >> a >> b;
+        add(a, b);
     }
-    sort(dat + 1, dat + m + 1, greater<pair<int, int>>);
-    for (int i = 1; i <= m; ++i) {
-        add(dat[i].second, dat[i].first);
-    }
-    // ans.reserve(2 * n);
+    for (i32 i = 1; i <= n; ++i)
+        std::sort(all(g[i]), [](const i32& a, const i32& b) { return a > b; });
     for (int i = 1; i <= n; ++i) {
         if (oud[i] - ind[i] == 1) {
             st = i;
@@ -89,30 +153,29 @@ signed main() {
             en = i;
             ++cnt;
         } else if (oud[i] != ind[i]) {
-            ++cnt;
+            cout << "No";
+            return 0;
+            // ++cnt;
         }
     }
     if (cnt == 0) {
         st = en = 1;
-    }
-    if ((cnt != 0 && cnt != 2) || !st || !en) {
-        puts("No");
+    } else if (cnt != 2) {
+        cout << "No";
         return 0;
     }
 
     if (n == 2) {
-        for (int i = 0; i <= m; ++i) {
-            write(1 + (i % 2));
-            putchar(' ');
-        }
+        for (int i = 0; i <= m; ++i)
+            cout << 1 + (i % 2) << ' ';
         return 0;
     }
 
     dfs(st);
 
-    for (auto it = tail; it > 0; --it) {
-        printf("%d ", ans[it]);
-    }
+    std::reverse(all(ans));
+    for (auto x : ans)
+        cout << x << ' ';
 
     return 0;
 }

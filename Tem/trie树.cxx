@@ -1,60 +1,85 @@
-// https://www.acwing.com/problem/content/837/
-
+#include <array> 
 #include <iostream>
 #include <string>
 
-#define N 200005
-#define endl '\n'
+#define MAX 3000005
+
+struct Node {
+    std::array<Node*, '{' - '0' + 1> son;
+    // int cnt;
+    int siz;
+} trie[MAX];
 
 using std::string;
 
-struct Node {
-    Node* son[26];
-    int cnt;
-    char letter;
-} trie[N];
 Node* idx = trie;
 
 void insert(string& s) {
     Node* pos = trie;
     for (auto c : s) {
-        if (!pos->son[c - 'a']) {
-            pos->son[c - 'a'] = ++idx;
-        }
-        pos = pos->son[c - 'a'];
+        c -= '0';
+        if (!pos->son[c]) pos->son[c] = ++idx;
+        pos = pos->son[c];
+        ++(pos->siz);
     }
-    ++pos->cnt;
+    // ++(pos->cnt);
+    // ++pos->siz;
 }
+
+// void dfs(Node* nod) {
+//     nod->siz = nod->cnt;
+//     for (auto i : nod->son) {
+//         if (!i) continue;
+//         dfs(i);
+//         nod->siz += i->siz;
+//     }
+//     // std::cout << nod->cnt << ' ' << nod->siz << std::endl;
+// }
 
 int query(string& s) {
     Node* pos = trie;
     for (auto c : s) {
-        if (pos->son[c - 'a'])
-            pos = pos->son[c - 'a'];
-        else
-            return 0;
+        c -= '0';
+        if (!pos->son[c]) return 0;
+        pos = pos->son[c];
     }
-    return pos->cnt;
+    return pos->siz;
 }
-
-string str;
-char beh;
-int n;
 
 using std::cin;
 using std::cout;
 
+#define endl '\n'
+
+int n, q;
+string str;
+int t;
+
 int main() {
     std::ios::sync_with_stdio(0);
-    cin.tie(0);
-    cout.tie(0);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
 
-    cin >> n;
-    while (n--) {
-        cin >> beh >> str;
-        switch (beh) {
-            case ('I'): insert(str); break;
-            case ('Q'): cout << query(str) << endl; break;
+    cin >> t;
+
+    while (t--) {
+        cin >> n >> q;
+        while (n--) {
+            cin >> str;
+            insert(str);
+        }
+        while (q--) {
+            cin >> str;
+            cout << query(str) << endl;
+        }
+        if (t) {
+            ++idx;
+            for (; idx != trie; --idx) {
+                idx->siz = 0;
+                idx->son.fill(0);
+            }
+            idx = trie;
+            idx->siz = 0, idx->son.fill(0);
         }
     }
 
